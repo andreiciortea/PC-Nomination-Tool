@@ -33,8 +33,8 @@ On the page `manage`, several admin tools are proposed.
 - You can import nominations as a CSV file.
 - You can export the nomination database as a CSV file.
 - You can check whether there are potential duplicates: database entries representing the same person
-but with a different email address.
-- You can explore in a big table with all the nominated persons.
+but with different email addresses.
+- You can explore in a big table with all nominated individuals.
 
 This page is only accessible to users that are logged in via Django. You typically only want admins to have a Django account for this project.
 
