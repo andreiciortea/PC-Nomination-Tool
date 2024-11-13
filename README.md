@@ -1,25 +1,27 @@
 # PC-Nomination-Tool
 
 This repository hosts a [Django](https://www.djangoproject.com/) project that implements a
-program committee (PC) nomination tool. This website allows users to nominate PC members, checking in
-the background that the nominated persons have not already been nominated to avoid the usual 
+programme committee (PC) nomination tool. This website allows users to nominate PC members, checking in
+the background that the nominated individuals have not already been nominated, so as to avoid the usual
 overhead of finding duplicates in long lists of nominations.
+
+The tool was originally developed for ECAI-2024, the 27th European Conference on Artificial Intelligence, where it was successfully used to assemble a list of over 5,000 nominees.
 
 ## Presentation of the Tool
 
 ### Nominating Potential PC Members
 
-This tool is used to nominate PC members. After entering their name, users arrive to this page:
+This tool is used to nominate PC members. After entering their name, users arrive at this page:
 
 ![Screenshot of the Nomination Page](readme_imgs/nom_nomination.png?raw=true)
 
-Using this form, users can enter the details of a person. The details they are entering are matched
+Using this form, users can enter the details of a person. These are matched
 against the database in the background, warning the user if they are potentially entering the details
 of someone who has already been nominated.
 
 ![Screenshot of the Nomination Page with Duplicates Showing](readme_imgs/nom_duplicates.png?raw=true)
 
-The identity of a person is linked to their DBLP page URL (as the other details needs not be unique).
+The identity of a person is linked to their DBLP page URL (as the other details need not be unique).
 When entering the name of someone, the DBLP API is queried to suggest pre-filled information:
 
 ![Screenshot of the Nomination Page with DBLP Results](readme_imgs/nom_DBLP.png?raw=true)
@@ -30,12 +32,11 @@ On the page `manage`, several admin tools are proposed.
 
 - You can import nominations as a CSV file.
 - You can export the nomination database as a CSV file.
-- You can check if there are potential duplicates: database entries representing the same person
-but with different email addresses.
-- You can explore in a big table all the nominated persons.
+- You can check whether there are potential duplicates: database entries representing the same person
+but with a different email address.
+- You can explore in a big table with all the nominated persons.
 
-This page is only accessible to users that are logged in via Django. You typically only want admins to have actual
-Django account for this project.
+This page is only accessible to users that are logged in via Django. You typically only want admins to have a Django account for this project.
 
 ## Development/Deployment
 
@@ -85,7 +86,7 @@ pip install -r requirements.txt
 
 ### Database Setup
 
-To create the databases, run the following:
+To create the databases, run the following commands:
 
 ```shell
 python manage.py makemigrations
@@ -103,7 +104,7 @@ python manage.py createsuperuser
 
 ### Serve the Website Locally
 
-To serve the website on your local machine run: 
+To serve the website on your local machine run:
 
 ```
 python manage.py runserver
