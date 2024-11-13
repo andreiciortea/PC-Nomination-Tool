@@ -1,0 +1,193 @@
+{% extends 'programcommittee/base.html' %}
+
+{% block extra_head %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+{% endblock %}
+
+{% block title %}PC Nomination | ECAI 2024{% endblock %}
+
+{% block header %}
+    <h1>ECAI-2024 &mdash; PC Member Nomination </h1>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="section-content">
+            <h2>Potential Duplicate {{ duplicate.nomination1.full_name }}</h2>
+
+            {% if resolver_form.errors %}
+                <div class="form-error-message">
+                    <ul>
+                        {% for key, value in resolver_form.errors.items %}
+                            <li>{{ key }}: {{ value }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form class="duplicate-wrapper" method="post" action="{% url 'programcommittee:duplicate' duplicate_id=duplicate.id%}">
+                {% csrf_token %}
+
+                <div class="duplicate-table-header">First Name</div>
+                <div {% if duplicate.nomination1.first_name == duplicate.nomination2.first_name %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination1.first_name }}
+                </div>
+                <div {% if duplicate.nomination1.first_name == duplicate.nomination2.first_name %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination2.first_name }}
+                </div>
+                <div>{% include 'include/contenteditable_field.html' with field=resolver_form.first_name %}</div>
+
+                <div class="duplicate-table-header">Last Name</div>
+                <div {% if duplicate.nomination1.last_name == duplicate.nomination2.last_name %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination1.last_name }}
+                </div>
+                <div {% if duplicate.nomination1.last_name == duplicate.nomination2.last_name %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination2.last_name }}
+                </div>
+                <div>{% include 'include/contenteditable_field.html' with field=resolver_form.last_name %}</div>
+
+                <div class="duplicate-table-header">Full Name</div>
+                <div {% if duplicate.nomination1.full_name == duplicate.nomination2.full_name %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination1.full_name }}
+                </div>
+                <div {% if duplicate.nomination1.full_name == duplicate.nomination2.full_name %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination2.full_name }}
+                </div>
+                <div>{% include 'include/contenteditable_field.html' with field=resolver_form.full_name %}</div>
+
+                <div class="duplicate-table-header">DBLP</div>
+                <div {% if duplicate.nomination1.dblp == duplicate.nomination2.dblp %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% if duplicate.nomination1.dblp %}
+                        <a href="{{ duplicate.nomination1.dblp }}" target="_blank">{{ duplicate.nomination1.dblp }}</a>
+                    {% endif %}
+                </div>
+                <div {% if duplicate.nomination1.dblp == duplicate.nomination2.dblp %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% if duplicate.nomination2.dblp %}
+                        <a href="{{ duplicate.nomination3.dblp }}" target="_blank">{{ duplicate.nomination3.dblp }}</a>
+                    {% endif %}
+                </div>
+                <div>{% include 'include/contenteditable_field.html' with field=resolver_form.dblp %}</div>
+
+                <div class="duplicate-table-header">Email</div>
+                <div {% if duplicate.nomination1.emails.all == duplicate.nomination2.emails.all %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% for e in duplicate.nomination1.emails.all %}
+                        <p style="margin: 0">{{ e.email }}</p>
+                    {% endfor %}
+                </div>
+                <div {% if duplicate.nomination1.emails.all == duplicate.nomination2.emails.all %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% for e in duplicate.nomination2.emails.all %}
+                        <p style="margin: 0">{{ e.email }}</p>
+                    {% endfor %}
+                </div>
+                <div>{{ resolver_form.emails }}</div>
+
+                <div class="duplicate-table-header">Area</div>
+                <div {% if duplicate.nomination1.areas.all == duplicate.nomination2.areas.all %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% for e in duplicate.nomination1.areas.all %}
+                        <p style="margin: 0">{{ e }}</p>
+                    {% endfor %}
+                </div>
+                <div {% if duplicate.nomination1.areas.all == duplicate.nomination2.areas.all %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% for e in duplicate.nomination2.areas.all %}
+                        <p style="margin: 0">{{ e }}</p>
+                    {% endfor %}
+                </div>
+                <div>{{ resolver_form.areas }}</div>
+
+                <div class="duplicate-table-header">PhD Date</div>
+                <div {% if duplicate.nomination1.phd_date == duplicate.nomination2.phd_date %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination1.phd_date }}
+                </div>
+                <div {% if duplicate.nomination1.phd_date == duplicate.nomination2.phd_date %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination2.phd_date }}
+                </div>
+                <div>{{ resolver_form.phd_date }}</div>
+
+                <div class="duplicate-table-header">Proposer</div>
+                <div {% if duplicate.nomination1.proposer == duplicate.nomination2.proposer %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination1.proposer }}
+                </div>
+                <div {% if duplicate.nomination1.proposer == duplicate.nomination2.proposer %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination2.proposer }}
+                </div>
+                <div>{% include 'include/contenteditable_field.html' with field=resolver_form.proposer %}</div>
+
+                <div class="duplicate-table-header">Invited</div>
+                <div {% if duplicate.nomination1.ec_invited == duplicate.nomination2.ec_invited %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% include "include/boolean_symbol.html" with value=duplicate.nomination1.ec_invited %}
+                </div>
+                <div {% if duplicate.nomination1.ec_invited == duplicate.nomination2.ec_invited %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% include "include/boolean_symbol.html" with value=duplicate.nomination2.ec_invited %}
+                </div>
+                <div>{{ resolver_form.ec_invited }}</div>
+
+                <div class="duplicate-table-header">Accepted</div>
+                <div {% if duplicate.nomination1.ec_accepted == duplicate.nomination2.ec_accepted %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% include "include/boolean_symbol.html" with value=duplicate.nomination1.ec_accepted %}
+                </div>
+                <div {% if duplicate.nomination1.ec_accepted == duplicate.nomination2.ec_accepted %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% include "include/boolean_symbol.html" with value=duplicate.nomination2.ec_accepted %}
+                </div>
+                <div>{{ resolver_form.ec_accepted }}</div>
+
+                <div class="duplicate-table-header">Reserve</div>
+                <div {% if duplicate.nomination1.in_reserve == duplicate.nomination2.in_reserve %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% include "include/boolean_symbol.html" with value=duplicate.nomination1.in_reserve %}
+                </div>
+                <div {% if duplicate.nomination1.in_reserve == duplicate.nomination2.in_reserve %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {% include "include/boolean_symbol.html" with value=duplicate.nomination2.in_reserve %}
+                </div>
+                <div>{{ resolver_form.in_reserve }}</div>
+
+                <div class="duplicate-table-header">Comment</div>
+                <div {% if duplicate.nomination1.comment == duplicate.nomination2.comment %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination1.comment }}
+                </div>
+                <div {% if duplicate.nomination1.comment == duplicate.nomination2.comment %}class="duplicate-table-no-diff-row"{% else %}class="duplicate-table-diff-row"{% endif %}>
+                    {{ duplicate.nomination2.comment }}
+                </div>
+                <div>{{ resolver_form.comment }}</div>
+
+                <div></div>
+                <div></div>
+                <div><input class="button" style="background: var(--color-warning-dark);" type="submit" value="Tag Duplicate as Ignored" name="ignore_duplicates"></div>
+                <div><input class="button" style="background: var(--color-success-dark);"type="submit" value="Resolve Duplicate" name="resolve_duplicates"></div>
+            </form>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        function resizeTextArea(textarea) {
+            $(textarea).height(0);
+            $(textarea).height(textarea.scrollHeight + "px");
+        }
+
+        $(document).ready(function () {
+            $('div[contenteditable]').on('input', function () {
+                const targetId = $(this).data('for');
+                $('#' + targetId).val($(this).text());
+                updateFullName();
+            });
+
+            $('textarea').on('input', function () {
+                resizeTextArea(this);
+            });
+            $('textarea').each(function() {
+                resizeTextArea(this);
+            });
+
+            const first_name_input = $('#id_first_name');
+            const last_name_input = $('#id_last_name');
+            const full_name_input = $('#id_full_name');
+            const full_name_edit_div = $('#id_full_name_div');
+
+            function updateFullName() {
+                var fullName = first_name_input.val() + ' ' + last_name_input.val();
+                full_name_input.val(fullName);
+                full_name_edit_div.html(fullName);
+            }
+        });
+    </script>
+{% endblock %}

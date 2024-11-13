@@ -1,0 +1,46 @@
+{% csrf_token %}
+
+<table class="center-margin form-table">
+    {% if form.non_field_errors %}
+        <ul class="errorlist">
+            {% for error in form.non_field_errors %}
+                <tr class="form-error-row"><td colspan="2"><span class="form-error">{{ error }}</span></td></tr><br>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% for hidden_field in form.hidden_fields %}
+        {% if hidden_field.errors %}
+            <ul class="errorlist">
+            {% for error in hidden_field.errors %}
+                <tr class="form-error-row"><td colspan="2"><span class="form-error">{{ error }}</span></td></tr><br>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {{ hidden_field }}
+    {% endfor %}
+
+    {% for field in form.visible_fields %}
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <tr class="form-error-row"><td colspan="2"><span class="form-error">{{ error }}</span></td></tr><br>
+            {% endfor %}
+        {% endif %}
+        <tr class="form-field-row">
+            <td>
+                <label for="{{ field.auto_id }}">
+                    <span>{{ field.label }}</span>
+                    {% if field.help_text %}
+                        <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                    {% endif %}
+                </label>
+            </td>
+            <td>
+                {{ field }}
+            </td>
+        </tr>
+    {% endfor %}
+    <tr class="form-field-row">
+        <td colspan="2"><input class="button" type="submit" name="{{ form_type }}" value="{{ submit_button_label }}"></td>
+    </tr>
+</table>

@@ -1,0 +1,319 @@
+{% extends 'programcommittee/base.html' %}
+
+{% block extra_head %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+{% endblock %}
+
+{% block title %}PC Nomination Admin | ECAI 2024{% endblock %}
+
+{% block header %}
+    <h1>ECAI-2024 &mdash; PC Nomination &mdash; Admin</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'programcommittee:index' %}">&#8610;&nbsp;To home page</a>
+        </span>
+    </div>
+
+    <p class="center-align"><a href="{% url 'programcommittee:logout' %}" class="button">Logout</a> </p>
+
+    <section>
+        <div class="section-content">
+            <h2>Export Data</h2>
+	    <h3>API Syntax</h3>
+	    <p>The database includes people who have been nominated via this tool (and might get invited on EasyChair later), people who have been invited through EasyChair (but who might have declined or not yet accepted), and people who have accepted their EasyChair invite. People not yet on EasyChair can be marked as <i>reserve</i> if they should not get an EasyChair invite for now (or at all).</p>
+            <p>You can export the content of the database using the following query:</p>
+            <p class="center-align">{% url 'programcommittee:export_csv' %}?in_reserve=True&ec_invited=True&ec_accepted=True&added_date_before=2023-02-01&added_date_after=2023-01-01</p>
+
+            <p>
+                For instance, to obtain the nominations for individuals that have not yet been invited and that are not
+                on the reserve list, use the following:
+            </p>
+            <p class="center-align">
+                <a href="{% url 'programcommittee:export_csv' %}?in_reserve=False&ec_invited=False&ec_accepted=False">{% url 'programcommittee:export_csv' %}?in_reserve=False&ec_invited=False&ec_accepted=False</a>
+            </p>
+
+            <p>
+                If you request {% url 'programcommittee:export_csv' %}, you will obtain a csv. If you request
+                {% url 'programcommittee:export_ec' %}, you will obtain a text file the content of which can be pasted directly into EasyChair.
+            </p>
+
+            <h3>Shortcuts</h3>
+            <table class="center-margin lined-table">
+                <thead>
+                    <tr>
+                        <th>Invited</th>
+                        <th>Accepted</th>
+                        <th>Reserve</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th><span>&mdash;</span></th>
+                        <th><span>&mdash;</span></th>
+                        <th><span>&mdash;</span></th>
+                        <th>
+                            <a class="button" href="{% url 'programcommittee:export_csv' %}">CSV</a> &nbsp;
+                            <a class="button" href="{% url 'programcommittee:export_ec' %}">EC Text</a>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th><span class="xmark">&#x2717;</span></th>
+                        <th><span class="xmark">&#x2717;</span></th>
+                        <th><span class="xmark">&#x2717;</span></th>
+                        <th>
+                            <a class="button" href="{% url 'programcommittee:export_csv' %}?in_reserve=False&ec_invited=False&ec_accepted=False">CSV</a> &nbsp;
+                            <a class="button" href="{% url 'programcommittee:export_ec' %}?in_reserve=False&ec_invited=False&ec_accepted=False">EC Text</a>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th><span>&mdash;</span></th>
+                        <th><span>&mdash;</span></th>
+                        <th><span class="checkmark">&#x2713;</span></th>
+                        <th>
+                            <a class="button" href="{% url 'programcommittee:export_csv' %}?in_reserve=True">CSV</a> &nbsp;
+                            <a class="button" href="{% url 'programcommittee:export_ec' %}?in_reserve=True">EC Text</a>
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-content" id="upload">
+            <h2>Import Data</h2>
+            <p>
+                You can populate the database using the fom below. This form expects coma-separated CSV files with a
+                header. The following columns are used:
+            </p>
+            <ul>
+                <li><strong>first name</strong>, <em>required</em>: the first name of the person</li>
+                <li><strong>last name</strong>, <em>required</em>: the last name of the person</li>
+                <li><strong>DBLP</strong>, <em>optional</em>: the URL of the DBLP page of the person</li>
+                <li><strong>proposer</strong>, <em>optional</em>: the identifier of the nominator of the person</li>
+                <li><strong>chair</strong>, <em>optional</em>: the chair who nominated the person via EasyChair (used only if the proposer is not available)</li>
+                <li><strong>email</strong>, <em>required</em>: the email addresses of the person (several email addresses can be separated with ''###'')</li>
+            </ul>
+            <p>You need to select one action that comes with the file:</p>
+            <ul>
+                <li>
+	            <em>Invited</em>: the people in the CSV file will be added to the database (if not there yet)
+	            and marked as having been invited to join the PC on EasyChair (use EasyChair's <tt>committee_invitation.csv</tt>);
+                </li>
+                <li>
+                    <em>Accepted</em>: the people in the CSV file will be added to the database (if not there yet)
+                    and marked as having accepted their invitation on EasyChair (use EasyChair's <tt>committee.csv</tt>);
+                </li>
+                <li>
+                    <em>Reserve</em>: the people in the CSV file will be added to database (if not there yet)
+                    and marked as being on the reserve list (file needs to be constructed manually).
+                </li>
+            </ul>
+            <p>
+                In all cases, a person is retrieved based on the email addresses provided in the csv, and the DBLP page
+                when available.
+            </p>
+            {% if command_error %}
+                <div class="form-error-message">
+                    <p>An error occurred while running the management command: {{ command_error }}.</p>
+                </div>
+            {% endif %}
+            {% if command_log %}
+                <div class="form-success-message">
+                    <p style="margin-bottom: 20px;">File successfully imported. Here is the log.</p>
+                    {{ command_log|linebreaks }}
+                </div>
+            {% endif %}
+            <form action="{% url 'programcommittee:manage' %}#upload" method="post" enctype="multipart/form-data">
+                {% include 'include/form_table_template.html' with form=csv_form form_type='csv_form' submit_button_label='Submit' %}
+            </form>
+        </div>
+    </section>
+
+    <section id="nominations">
+        <div class="section-content">
+            <h2>Nominations</h2>
+
+            <h3 id="duplicates">{% if num_duplicates > 0 %}{{ num_duplicates }} {% endif %}Potential Duplicates</h3>
+
+            {% if duplicate_check_run %}
+                <div class="form-success-message">
+                    <p>The duplicate check has been run.</p>
+                </div>
+            {% endif %}
+
+            <p>
+                Potential duplicates are automatically identified if two nominations have the same full name.
+            </p>
+            <form action="{% url 'programcommittee:manage' %}#duplicates" method="post" class="center-align">
+                {% csrf_token %}
+                <input class="button" type="submit" value="Run Duplicate Checks" name="check_duplicates">
+            </form>
+
+            {% if num_duplicates > 0%}
+                <p>There are <strong>{{ num_duplicates }}</strong> potential duplicates. Go to the following page to resolve them.</p>
+
+                <p class="center-align">
+                    <a class="button" href="{% url 'programcommittee:duplicate_index' %}">To the duplicate page</a>
+                </p>
+            {% endif %}
+
+            <h3>All {{ nomination_forms|length }} Nominations</h3>
+
+            <p>Click the column headers to sort the rows.</p>
+
+            <p>For the email addresses, write one per line.</p>
+
+            {% if updated_nomination_full_name %}
+                <div class="form-success-message">
+                    <p>The nomination for {{ updated_nomination_full_name }} has been successfully updated.</p>
+                </div>
+            {% endif %}
+
+            {% if form_with_errors %}
+                <div class="form-error-message">
+                    <p>
+                        Errors while updating the nomination for {{ form_with_errors.nomination.full_name }}:
+                    </p>
+                    <ul>
+                        {% if form_with_errors.non_field_errors %}
+                            {% for error in form_with_errors.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endif %}
+                        {% for hidden_field in form_with_errors.hidden_fields %}
+                            {% if hidden_field.errors %}
+                                {% for error in hidden_field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        {% for field in form_with_errors.visible_fields %}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if deleted_nomination_name %}
+                <div class="form-success-message">
+                    <p>The entry corresponding to {{ deleted_nomination_name }} has been deleted.</p>
+                </div>
+            {% endif %}
+
+            <div class="nomination-row-container">
+                <div class="nomination-row nomination-row-header">
+                    <div class="header-cell sortable" data-field="first_name">First Name</div>
+                    <div class="header-cell sortable" data-field="last_name">Last Name</div>
+                    <div class="header-cell sortable" data-field="full_name">Full Name</div>
+                    <div class="header-cell sortable" data-field="dblp">DBLP URL</div>
+                    <div class="header-cell sortable" data-field="emails">Email Address(es)</div>
+                    <div class="header-cell sortable" data-field="added_date">Added Date</div>
+                    <div class="header-cell sortable" data-field="proposer">Proposer</div>
+                    <div class="header-cell sortable" data-field="invited">Inv.</div>
+                    <div class="header-cell sortable" data-field="accepted">Acc.</div>
+                    <div class="header-cell sortable" data-field="reserve">Res.</div>
+                    <div class="header-cell sortable" data-field="reserve">Comment</div>
+                    <div class="header-cell"></div>
+                </div>
+                {% for nomination_form in nomination_forms %}
+                    <form class="nomination-row" method="post" action="{% url 'programcommittee:manage' %}#nominations" id="update_nomination_{{ nomination_form.nomination.id }}">
+                        {% with nomination_form.nomination as nomination %}
+                            {% include 'include/contenteditable_field.html' with field=nomination_form.first_name %}
+                            {% include 'include/contenteditable_field.html' with field=nomination_form.last_name %}
+                            {% include 'include/contenteditable_field.html' with field=nomination_form.full_name %}
+                            <div>
+                                {% if nomination.dblp %}
+                                    <span class="current-url-value">Current: <a href="{{ nomination.dblp }}" target="_blank">{{ nomination.dblp }}</a></span><br>
+                                {% endif %}
+                                {% include 'include/contenteditable_field.html' with field=nomination_form.dblp %}
+                            </div>
+                            <div>{{ nomination_form.emails }}</div>
+                            <div>{{ nomination.added_date|date:"Y-m-d" }}</div>
+                            <div>{% include 'include/contenteditable_field.html' with field=nomination_form.proposer %}</div>
+                            <div>{{ nomination_form.invited }}</div>
+                            <div>{{ nomination_form.accepted }}</div>
+                            <div>{{ nomination_form.reserve }}</div>
+                            <div>{% include 'include/contenteditable_field.html' with field=nomination_form.comment %}</div>
+                            <div>
+                                <input class="button" type="submit" value="Update" name="update_nom_{{ nomination.id }}"><br/>
+                                <input class="button" type="submit" value="Delete" name="delete_nom_{{ nomination.id }}" style="margin-top: 5px;background: var(--color-error-dark);" onclick="return confirm('Do you really want to delete {{ nomination.full_name }} from the database? This cannot be undone.')">
+                            </div>
+                        {% endwith %}
+                        {% csrf_token %}
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'programcommittee:index' %}">&#8610;&nbsp;To home page</a>
+        </span>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        function resizeTextArea(textarea) {
+            $(textarea).height(0);
+            $(textarea).height(textarea.scrollHeight + "px");
+        }
+
+        $(document).ready(function () {
+            var sortOrder = "";
+
+            $(".sortable").on("click", function() {
+                var columnIndex = $(this).index();
+
+                // Get the direction of sorting
+                sortOrder = sortOrder === "asc" ? "desc" : "asc";
+
+                // Remove sorting classes from all header cells and add the new one
+                $(".sortable").removeClass("asc desc").filter(":nth-child(" + (columnIndex + 1) + ")").addClass(sortOrder);
+
+                // Get all rows excluding the first one (header)
+                var container = $(".nomination-row-container");
+                var rows = $(".nomination-row").not(".nomination-row-header").detach().get();
+                rows.sort(function(a, b) {
+                    var keyA = getKey($(a).children().eq(columnIndex));
+                    var keyB = getKey($(b).children().eq(columnIndex));
+                    return (sortOrder === "asc") ? (keyA > keyB) - (keyA < keyB) : (keyB > keyA) - (keyB < keyA);
+                });
+                $.each(rows, function(index, row) {
+                    container.append(row);
+                });
+            });
+
+            function getKey(cell) {
+                const input = cell.find("input");
+                if (input.length > 0) {
+                    return input.is(":checkbox") ? input.prop("checked") : input.val().toUpperCase();
+                }
+                return cell.text().toUpperCase();
+            }
+
+            $('div[contenteditable]').on('input', function () {
+                const targetId = $(this).data('for');
+                $('#' + targetId).val($(this).text());
+            });
+
+            const allTextAreas = $('textarea');
+            allTextAreas.on('input', function () {
+                resizeTextArea(this);
+            });
+            allTextAreas.each(function() {
+                resizeTextArea(this);
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'programcommittee/base.html' %}
+
+{% block extra_head %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+{% endblock %}
+
+{% block title %}PC Nomination | ECAI 2024{% endblock %}
+
+{% block header %}
+    <h1>ECAI-2024 &mdash; PC Member Nomination </h1>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="section-content">
+            <p>
+                Welcome to the PC member nomination tool.
+            </p>
+            {% if proposer_id %}
+                <p>
+                    Your user name is: <strong>{{ proposer_id }}</strong>.
+                </p>
+                <p class="center-align">
+                    <a class="button" href="{% url "programcommittee:index" %}?logout=True">Logout</a>
+                </p>
+            {% else %}
+                <p>
+                    First, choose a user name, preferably your full name.
+                    We should be able to easily identify who you are. 
+                </p>
+                {% if proposer_id_form %}
+                    <form action="{% url 'programcommittee:index' %}" method="post">
+                        {% include "include/form_table_template.html" with form=proposer_id_form form_type='proposer_id_form' submit_button_label='Continue' %}
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </section>
+
+    {% if proposer_id %}
+        <section id="form">
+            <div class="section-content">
+                <p>
+                    Please use the form below to nominate PC members. Note that we are
+                    trying to ensure that nobody is nominated more than once.
+                </p>
+                <p>
+                    Please keep in mind that every PC member must have a PhD (by April 2024),
+                    should have published a couple of times at good AI conferences, and
+	            should have prior experience with reviewing (e.g., as a subreviewer).
+	            For nominees with a PhD from 2024, please always add a comment to explain the situation.
+                </p>
+
+                {% if added_nomination %}
+                    <div class="form-success-message">
+                        <p>{{ added_nomination.full_name|title }} has been added to the database.</p>
+                    </div>
+                {% endif %}
+
+                <div class="side-by-side-top-wrapper">
+                    <div>
+                        {% if add_person_form %}
+                            <form action="{% url 'programcommittee:index' %}#form" method="post">
+                                {% csrf_token %}
+                                <table class="center-margin form-table">
+                                    {% if add_person_form.non_field_errors %}
+                                        <ul class="errorlist">
+                                            {% for error in add_person_form.non_field_errors %}
+                                                <tr class="form-error-row"><td colspan="2"><span class="form-error">{{ error }}</span></td></tr><br>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                    {% for field in add_person_form.visible_fields %}
+                                        {% if field.label == "DBLP page" %}
+                                            <tr class="form-field-row">
+                                                <td style="background-color: var(--color-background-light); border: none;"></td>
+                                                <td><button id="dblp-query" type="button">Fetch DBLP details</button></td>
+                                            </tr>
+                                            <tr class="form-field-row">
+                                                <td colspan="2" style="background-color: var(--color-background-light); border: none;" id="dblp-results"></td>
+                                            </tr>
+                                        {% endif %}
+                                        {% if field.errors %}
+                                            {% for error in field.errors %}
+                                                <tr class="form-error-row"><td colspan="2"><span class="form-error">{{ error }}</span></td></tr><br>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <tr class="form-field-row{% if field.field.widget.attrs.readonly %} form-disabled{% endif %}">
+                                            <td>
+                                                <label for="{{ field.auto_id }}">
+                                                    <span>{{ field.label }}</span>
+                                                    {% if field.help_text %}
+                                                        <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                                                    {% endif %}
+                                                </label>
+                                            </td>
+                                            <td>
+                                                {{ field }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr class="form-field-row">
+                                        <td colspan="2"><input class="button" type="submit" name="add_person_form" value="Nominate"></td>
+                                    </tr>
+                                </table>
+                            </form>
+                        {% endif %}
+                    </div>
+                    <div id="query-check">
+                        <p>No potential duplicates so far.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    {% if proposed %}
+        <section>
+            <div class="section-content">
+                <h2>Your nominations</h2>
+                <table class="center-margin lined-table">
+                    <thead>
+                        <tr>
+                            <th>First name</th>
+                            <th>Last name</th>
+                            <th>DBLP page</th>
+                            <th>Areas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for person in proposed %}
+                            <tr>
+                                <td>{{ person.first_name }}</td>
+                                <td>{{ person.last_name }}</td>
+                                <td><a href="{{ person.dblp }}">{{ person.dblp }}</a></td>
+                                <td>{% for area in person.areas.all %}{% if forloop.last %}{{ area }}{% else %}{{ area }} &mdash; {% endif %}{% endfor %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+
+    <script>
+        $(document).ready(function () {
+            const first_name_input = $('#id_first_name');
+            const last_name_input = $('#id_last_name');
+            const full_name_input = $('#id_full_name');
+            const email_input = $('#id_email');
+            const dblp_input = $('#id_dblp');
+            const query_check_div = $('#query-check');
+
+            function updateFullName() {
+                var fullName = first_name_input.val() + ' ' + last_name_input.val();
+                full_name_input.val(fullName);
+            }
+            first_name_input.on('input', updateFullName);
+            last_name_input.on('input', updateFullName);
+
+            // Function to handle input changes
+            function checkSimilarPersons() {
+                // Check the length of input fields
+                const firstNameLength = first_name_input.val().length;
+                const lastNameLength = last_name_input.val().length;
+                const emailLength = email_input.val().length;
+                const dblpLength = dblp_input.val().length;
+                const requestData = {};
+
+                // Include the input in the query only if it has at least 3 characters
+                if (firstNameLength >= 3) {
+                    requestData['first_name'] = first_name_input.val();
+                }
+                if (lastNameLength >= 3) {
+                    requestData['last_name'] = last_name_input.val();
+                }
+                if (emailLength >= 3) {
+                    requestData['email'] = email_input.val();
+                }
+                if (dblpLength >= 3) {
+                    requestData['dblp'] = dblp_input.val();
+                }
+
+                // Only send the query if at least 4 characters are present in any input field
+                if (Object.keys(requestData).length > 0) {
+                    // Make an AJAX request to the check_entry view
+                    $.ajax({
+                        type: 'POST',
+                        url: '{% url "programcommittee:check_entry" %}',
+                        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+                        data: {
+                            'first_name': first_name_input.val(),
+                            'last_name': last_name_input.val(),
+                            'email': email_input.val(),
+                            'dblp': dblp_input.val()
+                        },
+                        success: function (data) {
+                            if (data.error) {
+                                console.error('Error:', data.error);
+                                query_check_div.empty();
+                                query_check_div.append('<p>No potential duplicates so far.</p>');
+                            } else {
+                                const similarPersons = data.similar_persons;
+                                if (similarPersons.length > 0) {
+                                    // Clear previous results
+                                    query_check_div.css('display', 'block');
+                                    query_check_div.empty();
+                                    query_check_div.append('<p>Potential duplicates:</p>');
+                                    const ulContainer = $('<ul>')
+
+                                    // Append a <p> element for each similar person
+                                    for (let i = 0; i < similarPersons.length; i++) {
+                                        const personDetail = '<li>' + similarPersons[i] + '</li>';
+                                        ulContainer.append(personDetail);
+                                    }
+                                    query_check_div.append(ulContainer);
+                                } else {
+                                    query_check_div.empty();
+                                    query_check_div.append('<p>No potential duplicates so far.</p>');
+                                }
+                            }
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            console.error('AJAX error:', errorThrown);
+                        }
+                    });
+                } else {
+                    query_check_div.empty();
+                    query_check_div.append('<p>No potential duplicates so far.</p>');
+                }
+            }
+
+            // Attach input event handlers
+            first_name_input.on('input', checkSimilarPersons);
+            last_name_input.on('input', checkSimilarPersons);
+            email_input.on('input', checkSimilarPersons);
+            dblp_input.on('input', checkSimilarPersons);
+
+            $('#dblp-query').on('click', function () {
+                // Make an AJAX request to the DBLP API
+                $.ajax({
+                    type: 'GET',
+                    url: 'https://dblp.org/search/author/api',
+                    data: {
+                        q: first_name_input.val() + ' ' + last_name_input.val(),
+                        format: 'json'
+                    },
+                    success: function (data) {
+                        showDblpResults(data);
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.error('DBLP API error:', errorThrown);
+                    }
+                });
+            });
+
+            const dblp_result_td = $('#dblp-results');
+            // Function to display DBLP results and handle selection
+            function showDblpResults(data) {
+                // Clear previous results
+                dblp_result_td.empty();
+
+                if (data.result.hits && data.result.hits.hit && data.result.hits.hit.length > 0) {
+                    for (let i = 0; i < data.result.hits.hit.length; i++) {
+                        const hit = data.result.hits.hit[i];
+                        const resultDiv = $('<div>');
+                        resultDiv.html(hit.info.author + ' - <a href="' + hit.info.url + '" target="_blank">' + hit.info.url + '</a>&nbsp;');
+                        const hitButton = $('<button type="button">Select</button>');
+                        hitButton.on('click', (function (url, fullName) {
+                            return function () {
+                                dblp_input.val(url);
+                                dblp_result_td.hide();
+                                full_name_input.val(fullName);
+
+                                const lowerLastName = first_name_input.val().toLowerCase();
+                                const lowerFirstName = last_name_input.val().toLowerCase();
+                                const lowerFullName = fullName.toLowerCase();
+                                if (lowerFirstName === "" || lowerLastName === "" || !lowerFullName.includes(lowerLastName) || !lowerFullName.includes(lowerFirstName)) {
+                                    const full_name_split = fullName.split(" ");
+                                    first_name_input.val(full_name_split[0]);
+                                    last_name_input.val(full_name_split.slice(1).join(" "));
+                                }
+                            };
+                        })(hit.info.url, hit.info.author));
+                        resultDiv.append(hitButton);
+                        dblp_result_td.append(resultDiv);
+                    }
+                    dblp_result_td.show();
+                } else {
+                    dblp_result_td.html('<p>No DBLP entries found for the given name.</p>');
+                    dblp_result_td.show();
+                }
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'programcommittee/base.html' %}
+
+{% block extra_head %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+{% endblock %}
+
+{% block title %}PC Nomination | ECAI 2024{% endblock %}
+
+{% block header %}
+    <h1>ECAI-2024 &mdash; PC Member Nomination </h1>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="section-content">
+            <p>There are no duplicates, <a href="{% url 'programcommittee:manage' %}">return to the management page</a>.</p>
+        </div>
+    </section>
+{% endblock %}
