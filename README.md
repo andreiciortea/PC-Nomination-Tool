@@ -13,18 +13,16 @@ This tool is used to nominate PC members. After entering their name, users arriv
 
 ![Screenshot of the Nomination Page](readme_imgs/nom_nomination.png?raw=true)
 
-<img src="https://github.com/uendriss/PC-Nomination-Tool/tree/main/readme_imgs/nom_nomination.png" alt="Nomination page" height="50vh"/>
-
 Using this form, users can enter the details of a person. The details they are entering are matched
 against the database in the background, warning the user if they are potentially entering the details
 of someone who has already been nominated.
 
-<img src="https://github.com/uendriss/PC-Nomination-Tool/tree/main/readme_imgs/nom_duplicates.png" alt="Nomination page" height="50vh"/>
+![Screenshot of the Nomination Page with Duplicates Showing](readme_imgs/nom_duplicates.png?raw=true)
 
 The identity of a person is linked to their DBLP page URL (as the other details needs not be unique).
 When entering the name of someone, the DBLP API is queried to suggest pre-filled information:
 
-<img src="https://github.com/uendriss/PC-Nomination-Tool/tree/main/readme_imgs/nom_DBLP.png" alt="Nomination page" height="50vh"/>
+![Screenshot of the Nomination Page with DBLP Results](readme_imgs/nom_DBLP.png?raw=true)
 
 ### Administrating the Nominations
 
