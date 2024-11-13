@@ -11,6 +11,8 @@ overhead of finding duplicates in long lists of nominations.
 
 This tool is used to nominate PC members. After entering their name, users arrive to this page:
 
+![Screenshot of the Nomination Page](readme_imgs/nom_nomination.png?raw=true)
+
 <img src="https://github.com/uendriss/PC-Nomination-Tool/tree/main/readme_imgs/nom_nomination.png" alt="Nomination page" height="50vh"/>
 
 Using this form, users can enter the details of a person. The details they are entering are matched
