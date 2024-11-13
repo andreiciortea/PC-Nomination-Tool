@@ -9,8 +9,7 @@ overhead of finding duplicates in long lists of nominations.
 
 ### Nominating Potential PC Members
 
-This tool is accessible at the address `BASE_URL/nomination` where `BASE_URL` is the url of your
-server. It is used to nominate PC members. After entering their name, users arrive to this page:
+This tool is used to nominate PC members. After entering their name, users arrive to this page:
 
 <img src="https://github.com/uendriss/PC-Nomination-Tool/tree/main/readme_imgs/nom_nomination.png" alt="Nomination page" height="50vh"/>
 
@@ -27,13 +26,16 @@ When entering the name of someone, the DBLP API is queried to suggest pre-filled
 
 ### Administrating the Nominations
 
-On the page `BASE_URL/nomination/manage`, several admin tools are proposed.
+On the page `manage`, several admin tools are proposed.
 
 - You can import nominations as a CSV file.
 - You can export the nomination database as a CSV file.
 - You can check if there are potential duplicates: database entries representing the same person
 but with different email addresses.
 - You can explore in a big table all the nominated persons.
+
+This page is only accessible to users that are logged in via Django. You typically only want admins to have actual
+Django account for this project.
 
 ## Development/Deployment
 
@@ -77,7 +79,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 40 * 1024 * 1024
 Next, install the required python libraries. Additional libraries may be needed depending on your
 database engine.
 
-```
+```shell
 pip install -r requirements.txt
 ```
 
@@ -85,7 +87,7 @@ pip install -r requirements.txt
 
 To create the databases, run the following:
 
-```
+```shell
 python manage.py makemigrations
 python manage.py migrate
 python manage.py initialise_db
@@ -95,7 +97,7 @@ python manage.py initialise_db
 
 Create a super admin to have access to the admin pages:
 
-```
+```shell
 python manage.py createsuperuser
 ```
 
